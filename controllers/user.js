@@ -87,19 +87,23 @@ exports.addStudentId = async (req, res) => {
     try {
         const { email, input } = req.body
         let studentId
-        console.log("nput", input.includes("https"));
         if (input.includes("https") || input.includes("leetcode.com")) {
             const splittt = input.split("/")
             studentId = splittt[splittt.length - 1]
         }
         else
             studentId = input
-        console.log("studentId", studentId);
         const teacher = await userSchema.findOne({ email: email }).exec()
         if (!teacher) {
             return res.status(400).json({
                 success: false,
                 message: "User not found",
+            })
+        }
+        if (teacher.studentIds.includes(studentId)) {
+            return res.status(403).json({
+                success: false,
+                message: "Student is already added"
             })
         }
         teacher.studentIds.push(studentId)
@@ -121,7 +125,7 @@ exports.getHomepageData = async (req, res) => {
 
         const teacher = await userSchema.findOne({ email: email }).exec()
         if (!teacher) {
-            res.status(404).json({
+            return res.status(200).json({
                 success: false,
                 message: "Cannot get Teacher"
             })
@@ -132,13 +136,13 @@ exports.getHomepageData = async (req, res) => {
         await Promise.all(promiseArray)
             .then(data => returnData = data)
             .catch(error => new Error("Error in getting Students"))
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: returnData,
         })
     }
     catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: err
         })
