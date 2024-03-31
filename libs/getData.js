@@ -1,13 +1,27 @@
 const { accountSubmissionsQuery, allDataQuery, userProfileQuery, contestQuery } = require("./queries");
-const { getLeetcodeProfileData, getRecentSubmissions, getContestData } = require("./leetcode")
+const { getLeetcodeProfileData, getRecentSubmissions, getContestData, getSkillStats } = require("./leetcode")
 
 
 async function getAllUserData(username) {
     const profileData = await getLeetcodeProfileData(username)
     const recentSubmission = await getRecentSubmissions(username)
     const contestData = await getContestData(username)
-    return { "profileData": profileData, "recentSubmission": recentSubmission, "getContestData": contestData }
+    if (profileData instanceof Error)
+        return new Error("User not Found")
+    else
+        return { "profileData": profileData, "recentSubmission": recentSubmission, "getContestData": contestData }
 }
+
+async function getSkillsData(username) {
+    const skillStats = await getSkillStats(username)
+    const recentSubmissions = await getRecentSubmissions(username)
+    if (skillStats instanceof Error)
+        return new Error("User not Found")
+    const dataFormatted = formatSkillsData(skillStats, username)
+    console.log(dataFormatted);
+    return {"skillsData": dataFormatted, "recentSubmissions": recentSubmissions}
+}
+
 
 async function formatHomepageData(data) {
     const formattedData = {
@@ -16,6 +30,16 @@ async function formatHomepageData(data) {
         "userAvatar": data.matchedUser.profile.userAvatar,
         "ranking": data.matchedUser.profile.ranking,
         "starRating": data.matchedUser.profile.starRating
+    }
+    return formattedData
+}
+
+function formatSkillsData(data,username) {
+    const formattedData = {
+        "username": username,
+        "advanced": data?.matchedUser.tagProblemCounts.advanced,
+        "intermediate": data?.matchedUser.tagProblemCounts.intermediate,
+        "fundamental": data?.matchedUser.tagProblemCounts.fundamental,
     }
     return formattedData
 }
@@ -68,7 +92,4 @@ async function homepageData(username) {
 
 }
 
-async function leaderboardData(username) {
-
-}
-module.exports = { getAllUserData, homepageData };
+module.exports = { getAllUserData, homepageData, getSkillsData };

@@ -26,6 +26,30 @@ query getUserContestRanking ($username: String!) {
 }
 `
 
+const skillStatQuery = `
+query skillStats($username: String!) {
+    matchedUser(username: $username) {
+        tagProblemCounts {
+            advanced {
+                tagName
+                tagSlug
+                problemsSolved
+            } 
+            intermediate {
+                tagName
+                tagSlug
+                problemsSolved
+            }
+            fundamental {
+                tagName
+                tagSlug
+                problemsSolved
+            }
+        }
+    }
+}
+`
+
 const accountSubmissionsQuery = `
 query getACSubmissions ($username: String!, $limit: Int) {
   recentAcSubmissionList(username: $username, limit: $limit) {
@@ -146,5 +170,6 @@ module.exports = {
     accountSubmissionsQuery,
     userProfileQuery,
     recentSubmissionsQuery,
-    allDataQuery
+    allDataQuery,
+    skillStatQuery
 }

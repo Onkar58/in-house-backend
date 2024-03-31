@@ -7,7 +7,7 @@ require('dotenv').config();
 require('./libs/dbConnect')();
 
 const userRoutes = require('./routes/user');
-
+const studentRoutes = require('./routes/students')
 
 //Used to parse incoming requests data
 app.use(bodyParser.json({ limit: '5mb' }));
@@ -21,6 +21,7 @@ app.use(
 
 
 app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/student/', studentRoutes);
 
 
 app.get('/', (req, res) => {

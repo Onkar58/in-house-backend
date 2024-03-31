@@ -1,6 +1,6 @@
 const userSchema = require('../models/user.model')
 const uploader = require('../libs/cloudinary');
-const { getAllUserData, homepageData } = require('../libs/getData');
+const { getAllUserData, homepageData, getSkillsData } = require('../libs/getData');
 
 exports.createUser = async (req, res) => {
     console.log('Create User', req.body);
@@ -87,12 +87,14 @@ exports.addStudentId = async (req, res) => {
     try {
         const { email, input } = req.body
         let studentId
+        console.log("nput", input.includes("https"));
         if (input.includes("https") || input.includes("leetcode.com")) {
             const splittt = input.split("/")
             studentId = splittt[splittt.length - 1]
         }
         else
             studentId = input
+        console.log("studentId", studentId);
         const teacher = await userSchema.findOne({ email: email }).exec()
         if (!teacher) {
             return res.status(400).json({
@@ -100,21 +102,15 @@ exports.addStudentId = async (req, res) => {
                 message: "User not found",
             })
         }
-        if (teacher.studentIds.includes(studentId)) {
-            return res.status(403).json({
-                success: false,
-                message: "Student is already added"
-            })
-        }
         teacher.studentIds.push(studentId)
         teacher.save();
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             message: "Student Added Successfully",
         })
     }
     catch (err) {
-        res.status(500).json({ error: err.message, message: "Error" })
+        return res.status(500).json({ error: err.message, message: "Error" })
     }
 }
 
@@ -125,7 +121,7 @@ exports.getHomepageData = async (req, res) => {
 
         const teacher = await userSchema.findOne({ email: email }).exec()
         if (!teacher) {
-            return res.status(200).json({
+            return res.status(404).json({
                 success: false,
                 message: "Cannot get Teacher"
             })
@@ -147,4 +143,35 @@ exports.getHomepageData = async (req, res) => {
             error: err
         })
     }
+}
+
+exports.getAllStudentsSkillStats = async (req, res) => {
+    try {
+        const { email } = req.body
+    
+        const teacher = await userSchema.findOne({ email: email }).exec()
+        if (!teacher) {
+            return res.status(404).json({
+                success: false,
+                message: "Cannot get Teacher"
+            })
+        }
+        const studentIds = teacher.studentIds
+        const promiseArray = studentIds.map(username => getSkillsData(username))
+        let returnData = []
+        await Promise.all(promiseArray)
+            .then(data => returnData = data)
+            .catch(error => new Error("Error in getting Skills"))
+        return res.status(200).json({
+            success: true,
+            data: returnData,
+        })
+    }
+    catch (err) {
+        return res.status(500).json({
+            success: false,
+            error: err
+        })
+    }
+
 }
