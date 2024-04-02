@@ -21,7 +21,7 @@ app.use(
 
 
 app.use('/api/v1/user', userRoutes);
-app.use('/api/v1/student/', studentRoutes);
+app.use('/api/v1/student', studentRoutes);
 
 
 app.get('/', (req, res) => {

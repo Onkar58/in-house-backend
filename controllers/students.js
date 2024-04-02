@@ -1,8 +1,10 @@
-const { getAllUserData } = require("../libs/getData")
+const { getAllUserData, getSkillsData } = require("../libs/getData");
+const { getSkillStats } = require("../libs/leetcode");
 
 exports.getStudentData = async (req, res) => {
     try {
-        const username = req.params["0"].split("/")[2]
+        console.log("req", req.params);
+        const username = req.params["0"].split("/")[1]
         console.log("username", username);
         const studentsData = await getAllUserData(username)
         const formattedData = formatData(studentsData)
@@ -14,6 +16,22 @@ exports.getStudentData = async (req, res) => {
     catch (err) {
         return res.status(500).json({ error: err.message, message: "Error in getting user data" });
     }
+}
+
+exports.getUserSkillStats = async (req, res) => {
+    try {
+        const {username} = req.body
+        console.log("sufnv", username);
+        const studentsData = await getSkillsData(username)
+        if (studentsData instanceof Error)
+            return res.status(200).json({ success: false, message: "Student Not Found" })
+    
+        return res.status(200).json({ success: true, message: studentsData })
+    }
+    catch (err) {
+        return res.status(500).json({ error: err.message, message: "Error in getting user data" });
+    }
+
 }
 
 const formatData = (data) => {

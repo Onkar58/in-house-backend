@@ -102,6 +102,7 @@ async function getSkillStats(username) {
       if (data.errors) {
         new Error(data.errors[0].message);
       }
+      console.log("In query", data.data);
       return data.data;
     })
     .catch(err => {
