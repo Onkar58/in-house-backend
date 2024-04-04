@@ -13,17 +13,14 @@ async function uploader(file, email) {
     if (!file) return null;
     await userSchema.findOne({ email: email }).exec()
         .then((user) => {
-            console.log("User Exists");
             if (user?.profilePic) {
                 console.log(user.profilePic);
             }
         })
         .catch((err) => {
-            console.log("Error Occured", err);
         })
     const result = await cloudinary.uploader.upload(file, cloudinaryConfig )
         .then((result) => {
-            console.log("Image Uploaded", result.secure_url);
             return result.secure_url;
         })
         .catch((err) => {

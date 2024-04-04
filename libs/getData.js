@@ -18,7 +18,6 @@ async function getSkillsData(username) {
     if (skillStats instanceof Error)
         return new Error("User not Found")
     const dataFormatted = formatSkillsData(skillStats, username)
-    console.log(dataFormatted);
     return {"skillsData": dataFormatted, "recentSubmissions": recentSubmissions}
 }
 
@@ -79,14 +78,12 @@ async function homepageData(username) {
                 if (data.errors) {
                     return new Error(data.errors[0].message)
                 }
-                console.log(data.data);
                 const formattedData = formatHomepageData(data.data)
                 return formattedData;
             })
         return userData
     }
     catch (err) {
-        console.log("Erro", err);
         return err
     }
 

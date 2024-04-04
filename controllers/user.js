@@ -3,7 +3,7 @@ const uploader = require('../libs/cloudinary');
 const { getAllUserData, homepageData, getSkillsData } = require('../libs/getData');
 
 exports.createUser = async (req, res) => {
-    console.log('Create User', req.body);
+
     try {
         const { email, name, profilePic } = req.body
         const ifUserExists = await userSchema.findOne({ email: email }).exec();
@@ -15,7 +15,7 @@ exports.createUser = async (req, res) => {
         }
 
         const cloudinaryLink = await uploader(profilePic, email)
-        console.log("Link = ", cloudinaryLink);
+
         if (!cloudinaryLink) {
             return res.status(500).json({
                 success: false,
@@ -67,7 +67,6 @@ exports.getStudentsData = async (req, res) => {
             });
         }
         const studentIds = user123.studentIds;
-        console.log(studentIds);
         const returnData = []
         const promiseArray = studentIds.map(username => getAllUserData(username))
         await Promise.all(promiseArray)
@@ -87,14 +86,12 @@ exports.addStudentId = async (req, res) => {
     try {
         const { email, input } = req.body
         let studentId
-        console.log("nput", input.includes("https"));
         if (input.includes("https") || input.includes("leetcode.com")) {
             const splittt = input.split("/")
-            studentId = splittt[splittt.length - 1]
+            studentId = splittt[splittt.length - 1].toLowerCase()
         }
         else
-            studentId = input
-        console.log("studentId", studentId);
+            studentId = input.toLowerCase()
         const teacher = await userSchema.findOne({ email: email }).exec()
         if (!teacher) {
             return res.status(400).json({
@@ -102,11 +99,44 @@ exports.addStudentId = async (req, res) => {
                 message: "User not found",
             })
         }
-        teacher.studentIds.push(studentId)
+        if (teacher.studentIds.includes(studentId)) {
+            return res.status(403).json({
+                success: false,
+                message: "Student Already Added"
+            })
+        }
+        teacher.studentIds.push(studentId.trim().toLowerCase())
         teacher.save();
         return res.status(201).json({
             success: true,
             message: "Student Added Successfully",
+        })
+    }
+    catch (err) {
+        return res.status(500).json({ error: err.message, message: "Error" })
+    }
+}
+exports.deleteStudent = async (req, res) => {
+    try {
+        const { email, username } = req.body
+        const teacher = await userSchema.findOne({ email: email }).exec()
+        if (!teacher) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        if (teacher.studentIds.includes(username.trim().toLowerCase())) {
+            teacher.studentIds = teacher.studentIds.filter(id => (id !== username.trim().toLowerCase()))
+            teacher.save();
+            return res.status(201).json({
+                success: true,
+                message: "Student Deleted Successfully",
+            })
+        }
+        return res.status(401).json({
+            success: false,
+            message: "Cannot Delete the User"
         })
     }
     catch (err) {
@@ -148,7 +178,7 @@ exports.getHomepageData = async (req, res) => {
 exports.getAllStudentsSkillStats = async (req, res) => {
     try {
         const { email } = req.body
-    
+
         const teacher = await userSchema.findOne({ email: email }).exec()
         if (!teacher) {
             return res.status(404).json({

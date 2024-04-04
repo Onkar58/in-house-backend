@@ -3,9 +3,7 @@ const { getSkillStats } = require("../libs/leetcode");
 
 exports.getStudentData = async (req, res) => {
     try {
-        console.log("req", req.params);
         const username = req.params["0"].split("/")[1]
-        console.log("username", username);
         const studentsData = await getAllUserData(username)
         const formattedData = formatData(studentsData)
         if (studentsData instanceof Error)
@@ -21,7 +19,6 @@ exports.getStudentData = async (req, res) => {
 exports.getUserSkillStats = async (req, res) => {
     try {
         const {username} = req.body
-        console.log("sufnv", username);
         const studentsData = await getSkillsData(username)
         if (studentsData instanceof Error)
             return res.status(200).json({ success: false, message: "Student Not Found" })
