@@ -171,6 +171,56 @@ exports.deleteStudent = async (req, res) => {
     }
 }
 
+exports.addBatch = async (req, res) => {
+    try {
+        const { email, formData } = req.body
+        const teacher = await userSchema.findOne({ email: email }).exec()
+        if (!teacher) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        teacher.batches.push(formData)
+        teacher.save()
+        return res.status(201).json({
+            success: true,
+            message: "Batch Added"
+        })
+    }
+    catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Error in Adding Batch"
+        })
+    }
+}
+
+exports.deleteBatch = async (req, res) => {
+    try {
+        const { email } = req.body
+        const teacher = await userSchema.findOne({ email: email }).exec()
+        if (!teacher) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        teacher.batches.shift()
+        teacher.save()
+        return res.status(201).json({
+            success: true,
+            message: "Batch Deleted"
+        })
+    }
+    catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Error in Deleting Batch"
+        })
+    }
+}
+
 exports.getHomepageData = async (req, res) => {
     try {
         const { email } = req.body

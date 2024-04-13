@@ -18,7 +18,10 @@ let User = new Schema(
         },
         studentIds: {
             type: Array,
-        }
+        },
+        batches: {
+            type: Array
+        },
     },
     {
         collection: 'users'
