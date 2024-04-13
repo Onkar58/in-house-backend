@@ -116,6 +116,33 @@ exports.addStudentId = async (req, res) => {
         return res.status(500).json({ error: err.message, message: "Error" })
     }
 }
+
+exports.checkStudent = async (req, res) => {
+    try {
+        const { email, username } = req.body
+        const teacher = await userSchema.findOne({ email: email }).exec()
+        if (!teacher) {
+            return res.status(400).json({
+                success: false,
+                message: "Teacher not found",
+            })
+        }
+        if (teacher.studentIds.includes(username)) {
+            return res.status(201).json({
+                success: true,
+                message: "Student Exists",
+            })
+        }
+        return res.status(401).json({
+            success: false,
+            message: "Error in checking Student"
+        })
+    }
+    catch (err) {
+        return res.status(500).json({ error: err.message, message: "Error" })
+    }
+}
+
 exports.deleteStudent = async (req, res) => {
     try {
         const { email, username } = req.body
@@ -143,7 +170,6 @@ exports.deleteStudent = async (req, res) => {
         return res.status(500).json({ error: err.message, message: "Error" })
     }
 }
-
 
 exports.getHomepageData = async (req, res) => {
     try {
